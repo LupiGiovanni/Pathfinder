@@ -24,6 +24,7 @@ std::vector<Asterism> A_star::search (Asterism& start, Asterism& goal) {
     return asterism_path;
 }
 
+//TODO: is necessary to also add closed se or a check for already visited states?
 std::vector<State> A_star::search (State& start, const State& goal) {
     Board_set board_set;
     std::priority_queue<State, std::vector<State>, State_comparator> frontier;
@@ -84,7 +85,7 @@ long A_star::estimate_distance (const State& current, const State& goal) {
         total += std::abs( x_local_current - x_local_goal ) + std::abs( y_local_current - y_local_goal );
     }
 
-    return total;
+    return total; //TODO: rescaling, i.e. dividing by DISCRETE_CONVERSION_FACTOR?
 }
 
 bool A_star::is_goal_reached (const State& current, const State& goal) {
@@ -119,6 +120,7 @@ bool A_star::is_valid_state (const State& state, Board_set& board_set) {
         return ! board_set.detect_collision() && ! board_set.detect_vignette_fov_large();
 }
 
+//TODO: is it necessary to forcefully stop a board when it has reached its goal?
 std::vector<State> A_star::get_next_states (const State& current, const State& goal, Board_set& board_set) {
     std::vector<State> next_vector;
     State next;
