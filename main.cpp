@@ -1,18 +1,17 @@
-#include <iostream>
+#include "Asterism.h"
+#include "A_star.h"
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+int main () {
+    Asterism start (113.49709,-92.61197,75.734436,143.14001,173.01338,-177.28346);
+    Asterism goal (215.5604,-191.21825,27.321161,-77.286896,78.6281,-215.80367);
 
-int main() {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
+    A_star astar;
+    std::vector<Asterism> path = astar.search(start, goal);
 
-    const auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
-
-    for (int i = 1; i <= 5; i++) {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        std::cout << "i = " << i << std::endl;
+    for (const auto& asterism : path) {
+        for (const auto& point : asterism.p) {
+            std::cout << "(" << point.x() << ", " << point.y() << ") ";
+        }
+        std::cout << std::endl;
     }
-
-    return 0;
-    // TIP See CLion help at <a href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>. Also, you can try interactive lessons for CLion by selecting 'Help | Learn IDE Features' from the main menu.
 }
