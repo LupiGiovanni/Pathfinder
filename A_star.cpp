@@ -8,30 +8,38 @@
 
 #include "helper.h"
 
-std::vector<Asterism> A_star::search (Asterism& start, Asterism& goal) {
+std::vector<Asterism> A_star::search (Asterism& start, Asterism& destination) {
     Board_set board_set;
-    if (!board_set.align(start, goal))
+    if (!board_set.align(start, destination))
         return {};
 
     State start_state = convert(start);
-    State goal_state = convert(goal);
+    State goal_state = convert(destination);
 
-    std::vector<State> state_path = search(start_state, goal_state);
+    std::vector<State> state_path = search(start_state, goal_state, true);
+
+    if ( state_path.empty() )
+        state_path = search(start_state, goal_state, false);
+
     std::vector<Asterism> asterism_path;
     for (const auto& state : state_path)
         asterism_path.push_back(convert(state));
-
     return asterism_path;
 }
 
-//TODO: is necessary to also add closed se or a check for already visited states?
-std::vector<State> A_star::search (State& start, const State& goal) {
+std::vector<State> A_star::search (State& start, const State& goal, bool goal_locked_boards) {
     Board_set board_set;
+
     std::priority_queue<State, std::vector<State>, State_comparator> frontier;
     std::unordered_map<State, State, State_hasher, State_equal> came_from;
     std::unordered_map<State, long, State_hasher, State_equal> g_so_far;
     came_from.reserve(1 << 16);
     g_so_far.reserve(1 << 16);
+
+    for (int i = 0; i < 3; i++) {
+        goal_x_local[i] = transform_to_x_local(goal.p[i].x, goal.p[i].y, i);
+        goal_y_local[i] = transform_to_y_local(goal.p[i].x, goal.p[i].y, i);
+    }
 
     start.g = 0;
     start.f = estimate_distance(start, goal);
@@ -45,13 +53,16 @@ std::vector<State> A_star::search (State& start, const State& goal) {
         current = frontier.top();
         frontier.pop();
 
+        if (g_so_far.contains(current) && current.g > g_so_far[current])
+            continue;
+
         if ( is_goal_reached(current, goal) )
             return reconstruct_path(came_from, current);
 
-        std::vector<State> next_states = get_next_states(current, goal, board_set);
+        std::vector<State> next_states = get_next_states(current, goal, board_set, goal_locked_boards);
 
         for ( auto& s : next_states ) {
-            g_candidate = current.g + 10000; //TODO: change this magic number
+            g_candidate = current.g + ( CONVERSION_FACTOR_LONG * SEARCH_GRID_SIZE_FACTOR );
 
             if ( !g_so_far.contains(s) || g_candidate < g_so_far[s] ) {
                 g_so_far[s] = g_candidate;
@@ -69,23 +80,18 @@ std::vector<State> A_star::search (State& start, const State& goal) {
 long A_star::estimate_distance (const State& current, const State& goal) {
     long x_local_current;
     long y_local_current;
-
-    long x_local_goal;
-    long y_local_goal;
-
-    long total = 0;
+    long distance;
+    long max_distance = 0;
 
     for (int i = 0; i < 3; i++) {
         x_local_current = transform_to_x_local(current.p[i].x, current.p[i].y, i);
         y_local_current = transform_to_y_local(current.p[i].x, current.p[i].y, i);
 
-        x_local_goal = transform_to_x_local(goal.p[i].x, goal.p[i].y, i);
-        y_local_goal = transform_to_y_local(goal.p[i].x, goal.p[i].y, i);
-
-        total += std::abs( x_local_current - x_local_goal ) + std::abs( y_local_current - y_local_goal );
+        distance = std::abs( x_local_current - goal_x_local[i] ) + std::abs( y_local_current - goal_y_local[i] );
+        max_distance = std::max(max_distance, distance);
     }
 
-    return total; //TODO: rescaling, i.e. dividing by DISCRETE_CONVERSION_FACTOR?
+    return max_distance;
 }
 
 bool A_star::is_goal_reached (const State& current, const State& goal) {
@@ -120,24 +126,46 @@ bool A_star::is_valid_state (const State& state, Board_set& board_set) {
         return ! board_set.detect_collision() && ! board_set.detect_vignette_fov_large();
 }
 
-//TODO: is it necessary to forcefully stop a board when it has reached its goal?
-std::vector<State> A_star::get_next_states (const State& current, const State& goal, Board_set& board_set) {
+std::vector<State> A_star::get_next_states (const State& current, const State& goal, Board_set& board_set, bool restrict_finished_boards) {
     std::vector<State> next_vector;
     State next;
 
-    for (int i = 0; i < DIRECTIONS_COUNT; i++) {
-        for (int j = 0; j < DIRECTIONS_COUNT; j++) {
-            for (int k = 0; k < DIRECTIONS_COUNT; k++) {
+    int i_max = DIRECTIONS_COUNT;
+    int j_max = DIRECTIONS_COUNT;
+    int k_max = DIRECTIONS_COUNT;
+
+    if (restrict_finished_boards) {
+        long dx, dy;
+
+        dx = std::abs(current.p[0].x - goal.p[0].x);
+        dy = std::abs(current.p[0].y - goal.p[0].y);
+        if (dx <= GOAL_REACHED_TOLERANCE && dy <= GOAL_REACHED_TOLERANCE)
+            i_max = 1;
+
+        dx = std::abs(current.p[1].x - goal.p[1].x);
+        dy = std::abs(current.p[1].y - goal.p[1].y);
+        if (dx <= GOAL_REACHED_TOLERANCE && dy <= GOAL_REACHED_TOLERANCE)
+            j_max = 1;
+
+        dx = std::abs(current.p[2].x - goal.p[2].x);
+        dy = std::abs(current.p[2].y - goal.p[2].y);
+        if (dx <= GOAL_REACHED_TOLERANCE && dy <= GOAL_REACHED_TOLERANCE)
+            k_max = 1;
+    }
+
+    for (int i = 0; i < i_max; i++) {
+        for (int j = 0; j < j_max; j++) {
+            for (int k = 0; k < k_max; k++) {
                 if (i == 0 && j == 0 && k == 0)
                     continue;
 
                 next = current;
-                next.p[0].x += DX[0][i] * SEARCH_GRID_SIZE;
-                next.p[0].y += DY[0][i] * SEARCH_GRID_SIZE;
-                next.p[1].x += DX[1][j] * SEARCH_GRID_SIZE;
-                next.p[1].y += DY[1][j] * SEARCH_GRID_SIZE;
-                next.p[2].x += DX[2][k] * SEARCH_GRID_SIZE;
-                next.p[2].y += DY[2][k] * SEARCH_GRID_SIZE;
+                next.p[0].x += DX[0][i] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[0].y += DY[0][i] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[1].x += DX[1][j] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[1].y += DY[1][j] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[2].x += DX[2][k] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[2].y += DY[2][k] * SEARCH_GRID_SIZE_FACTOR;
 
                 if (is_valid_state(next, board_set)) {
                     next_vector.push_back(next);

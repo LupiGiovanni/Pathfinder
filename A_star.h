@@ -46,12 +46,15 @@ private:
         }
     };
 
-    std::vector<State> search (State& start, const State& goal);
+    std::vector<State> search (State& start, const State& goal, bool goal_locked_boards = true);
     long estimate_distance (const State& current, const State& goal);
     bool is_goal_reached (const State& current, const State& goal);
     bool is_valid_state (const State& state, Board_set& board_set);
-    std::vector<State> get_next_states (const State& current, const State& goal, Board_set& board_set);
+    std::vector<State> get_next_states (const State& current, const State& goal, Board_set& board_set, bool restrict_finished_boards);
     std::vector<State> reconstruct_path (const std::unordered_map<State, State, State_hasher, State_equal>& came_from, const State& current);
+
+    long goal_x_local[3] {};
+    long goal_y_local[3] {};
 };
 
 

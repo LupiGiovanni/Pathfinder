@@ -28,10 +28,11 @@ constexpr double BOARD_PROFILE_BUFFER_WIDTH = 10.; // mm
 constexpr double BOARDS_CRUISE_VELOCITY = 4.; // mm/s
 constexpr double DESTINATION_REACHED_TOLERANCE = BOARDS_CRUISE_VELOCITY * SIMULATION_TIME_STEP; // mm
 
-constexpr long GOAL_REACHED_TOLERANCE = 20000; // 1000 units = 1 mm
-constexpr long SEARCH_GRID_SIZE = 10; // 1 unit = 1 mm
+constexpr long GOAL_REACHED_TOLERANCE = 20000; // 1000 units == 1 mm
+constexpr long SEARCH_GRID_SIZE_FACTOR = 10; // 10 * 1000 units
 
-constexpr double DISCRETE_CONVERSION_FACTOR = 1000.; // 1000 units = 1 mm
+constexpr double CONVERSION_FACTOR_DOUBLE = 1000.; // *** DO NOT CHANGE! ***    1000 units == 1 mm
+constexpr long CONVERSION_FACTOR_LONG = 1000; // *** DO NOT CHANGE! ***
 constexpr long X_ORIGIN[3] = {284574, -402094, 117521};
 constexpr long Y_ORIGIN[3] = {-300000, -96448, 396448};
 constexpr long SIN30 = 500;
@@ -53,7 +54,7 @@ constexpr long DY[3][5] =
 };
 constexpr long ROTATION_VALUES[3][2] =
 {
-    { 0,     -1},       // board 0 ref system is rotated by -90 degrees
+    { 0,     -1000},    // board 0 ref system is rotated by -90 degrees
     { COS30,  SIN30},   // board 1 ref system is rotated by 30 degrees
     {-COS30,  SIN30}    // board 2 ref system is rotated by 150 degrees
 };
@@ -91,11 +92,11 @@ inline Polygon enlarge (const Polygon& polygon, double offset) {
 }
 
 inline long convert (double continuous_coordinate) {
-    return std::lround( continuous_coordinate * DISCRETE_CONVERSION_FACTOR );
+    return std::lround( continuous_coordinate * CONVERSION_FACTOR_DOUBLE );
 }
 
 inline double convert (long discrete_coordinate) {
-    return static_cast<double>( discrete_coordinate ) / DISCRETE_CONVERSION_FACTOR;
+    return static_cast<double>( discrete_coordinate ) / CONVERSION_FACTOR_DOUBLE;
 }
 
 inline long transform_to_x_local (long x_global, long y_global,  int reference_system_id) {
@@ -104,7 +105,9 @@ inline long transform_to_x_local (long x_global, long y_global,  int reference_s
     long cos = ROTATION_VALUES[reference_system_id][0];
     long sin = ROTATION_VALUES[reference_system_id][1];
 
-    return (x_global - x_origin) * cos + (y_global - y_origin) * sin;
+    long x_local = (x_global - x_origin) * cos + (y_global - y_origin) * sin;
+    return (x_local >= 0) ? ( x_local + CONVERSION_FACTOR_LONG/2 ) / CONVERSION_FACTOR_LONG :
+        ( x_local - CONVERSION_FACTOR_LONG/2 ) / CONVERSION_FACTOR_LONG;
 }
 
 inline long transform_to_y_local (long x_global, long y_global,  int reference_system_id) {
@@ -113,7 +116,9 @@ inline long transform_to_y_local (long x_global, long y_global,  int reference_s
     long cos = ROTATION_VALUES[reference_system_id][0];
     long sin = ROTATION_VALUES[reference_system_id][1];
 
-    return (x_global - x_origin) * -sin + (y_global - y_origin) * cos;
+    long y_local = (x_global - x_origin) * -sin + (y_global - y_origin) * cos;
+    return (y_local >= 0) ? ( y_local + CONVERSION_FACTOR_LONG/2 ) / CONVERSION_FACTOR_LONG :
+        ( y_local - CONVERSION_FACTOR_LONG/2 ) / CONVERSION_FACTOR_LONG;
 }
 
 
