@@ -49,7 +49,18 @@ std::vector<State> A_star::search (State& start, const State& goal, bool goal_lo
     State current;
     long g_candidate;
 
+    long iterations = 0;
+
     while (! frontier.empty() ) {
+
+        if (++iterations % 1000 == 0) {
+            std::cerr << "iter=" << iterations
+                       << " frontier=" << frontier.size()
+                       << " visited=" << g_so_far.size()
+                       << " current.f=" << current.f
+                       << " current.g=" << current.g << std::endl;
+        }
+
         current = frontier.top();
         frontier.pop();
 
