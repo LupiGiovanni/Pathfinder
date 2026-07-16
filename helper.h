@@ -29,7 +29,9 @@ constexpr double BOARDS_CRUISE_VELOCITY = 4.; // mm/s
 constexpr double DESTINATION_REACHED_TOLERANCE = BOARDS_CRUISE_VELOCITY * SIMULATION_TIME_STEP; // mm
 
 constexpr long GOAL_REACHED_TOLERANCE = 20000; // 1000 units == 1 mm
-constexpr long SEARCH_GRID_SIZE_FACTOR = 10; // 10 * 1000 units
+constexpr long SEARCH_GRID_SIZE = 10; // 10 * 1000 units
+constexpr long TIE_BREAK = 100;
+constexpr long WEIGHT = 2;
 
 constexpr double CONVERSION_FACTOR_DOUBLE = 1000.; // *** DO NOT CHANGE! ***    1000 units == 1 mm
 constexpr long CONVERSION_FACTOR_LONG = 1000; // *** DO NOT CHANGE! ***

@@ -14,9 +14,9 @@ class Board_set {
 public:
     Board_set ();
 
-    bool detect_collision () const ;
-    bool detect_vignette_fov_small () const;
-    bool detect_vignette_fov_large () const;
+    bool detect_collision (bool buffer_active = true) const ;
+    bool detect_vignette_fov_small (bool buffer_active = true) const;
+    bool detect_vignette_fov_large (bool buffer_active = true) const;
 
     bool align (Asterism& destination);
     bool align (Asterism& start, Asterism& destination);

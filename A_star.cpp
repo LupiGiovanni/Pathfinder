@@ -49,20 +49,22 @@ std::vector<State> A_star::search (State& start, const State& goal, bool goal_lo
     State current;
     long g_candidate;
 
+    // INSTRUMENTAL CODE
     long iterations = 0;
 
     while (! frontier.empty() ) {
+        current = frontier.top();
+        frontier.pop();
 
-        if (++iterations % 1000 == 0) {
+        // INSTRUMENTAL CODE ***********************************
+        if (++iterations % 1000000 == 0) {
             std::cerr << "iter=" << iterations
                        << " frontier=" << frontier.size()
                        << " visited=" << g_so_far.size()
                        << " current.f=" << current.f
                        << " current.g=" << current.g << std::endl;
         }
-
-        current = frontier.top();
-        frontier.pop();
+        // *******************************************************
 
         if (g_so_far.contains(current) && current.g > g_so_far[current])
             continue;
@@ -73,7 +75,7 @@ std::vector<State> A_star::search (State& start, const State& goal, bool goal_lo
         std::vector<State> next_states = get_next_states(current, goal, board_set, goal_locked_boards);
 
         for ( auto& s : next_states ) {
-            g_candidate = current.g + ( CONVERSION_FACTOR_LONG * SEARCH_GRID_SIZE_FACTOR );
+            g_candidate = current.g + ( CONVERSION_FACTOR_LONG * SEARCH_GRID_SIZE );
 
             if ( !g_so_far.contains(s) || g_candidate < g_so_far[s] ) {
                 g_so_far[s] = g_candidate;
@@ -93,6 +95,7 @@ long A_star::estimate_distance (const State& current, const State& goal) {
     long y_local_current;
     long distance;
     long max_distance = 0;
+    long sum_distance = 0;
 
     for (int i = 0; i < 3; i++) {
         x_local_current = transform_to_x_local(current.p[i].x, current.p[i].y, i);
@@ -100,9 +103,10 @@ long A_star::estimate_distance (const State& current, const State& goal) {
 
         distance = std::abs( x_local_current - goal_x_local[i] ) + std::abs( y_local_current - goal_y_local[i] );
         max_distance = std::max(max_distance, distance);
+        sum_distance += distance;
     }
 
-    return max_distance;
+    return ( max_distance + (sum_distance / TIE_BREAK) ) * WEIGHT;
 }
 
 bool A_star::is_goal_reached (const State& current, const State& goal) {
@@ -145,7 +149,7 @@ std::vector<State> A_star::get_next_states (const State& current, const State& g
     int j_max = DIRECTIONS_COUNT;
     int k_max = DIRECTIONS_COUNT;
 
-    if (restrict_finished_boards) {
+    if ( restrict_finished_boards ) {
         long dx, dy;
 
         dx = std::abs(current.p[0].x - goal.p[0].x);
@@ -171,12 +175,12 @@ std::vector<State> A_star::get_next_states (const State& current, const State& g
                     continue;
 
                 next = current;
-                next.p[0].x += DX[0][i] * SEARCH_GRID_SIZE_FACTOR;
-                next.p[0].y += DY[0][i] * SEARCH_GRID_SIZE_FACTOR;
-                next.p[1].x += DX[1][j] * SEARCH_GRID_SIZE_FACTOR;
-                next.p[1].y += DY[1][j] * SEARCH_GRID_SIZE_FACTOR;
-                next.p[2].x += DX[2][k] * SEARCH_GRID_SIZE_FACTOR;
-                next.p[2].y += DY[2][k] * SEARCH_GRID_SIZE_FACTOR;
+                next.p[0].x += DX[0][i] * SEARCH_GRID_SIZE;
+                next.p[0].y += DY[0][i] * SEARCH_GRID_SIZE;
+                next.p[1].x += DX[1][j] * SEARCH_GRID_SIZE;
+                next.p[1].y += DY[1][j] * SEARCH_GRID_SIZE;
+                next.p[2].x += DX[2][k] * SEARCH_GRID_SIZE;
+                next.p[2].y += DY[2][k] * SEARCH_GRID_SIZE;
 
                 if (is_valid_state(next, board_set)) {
                     next_vector.push_back(next);

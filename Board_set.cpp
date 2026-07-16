@@ -23,27 +23,58 @@ Board_set::Board_set () : boards{ Board(Board_type::board_0), Board(Board_type::
     // with our reference system
 }
 
-bool Board_set::detect_collision () const {
-    if ( CGAL::do_intersect(boards[0].profile_buffered, boards[1].profile_buffered) ||
-         CGAL::do_intersect(boards[1].profile_buffered, boards[2].profile_buffered) ||
-         CGAL::do_intersect(boards[0].profile_buffered, boards[2].profile_buffered) )
-        return true;
+bool Board_set::detect_collision (bool buffer_active) const {
+    if ( buffer_active ) {
+
+        if ( CGAL::do_intersect(boards[0].profile_buffered, boards[1].profile_buffered) ||
+             CGAL::do_intersect(boards[1].profile_buffered, boards[2].profile_buffered) ||
+             CGAL::do_intersect(boards[0].profile_buffered, boards[2].profile_buffered) )
+            return true;
+
+    } else {
+
+        if ( CGAL::do_intersect(boards[0].profile, boards[1].profile) ||
+             CGAL::do_intersect(boards[1].profile, boards[2].profile) ||
+             CGAL::do_intersect(boards[0].profile, boards[2].profile) )
+            return true;
+
+    }
 
     return false;
 }
 
-bool Board_set::detect_vignette_fov_small () const {
-    for (const auto& board : boards)
-        if (CGAL::do_intersect(board.profile_buffered, fov_small))
-            return true;
+bool Board_set::detect_vignette_fov_small (bool buffer_active) const {
+    if ( buffer_active ) {
+
+        for (const auto& board : boards)
+            if (CGAL::do_intersect(board.profile_buffered, fov_small))
+                return true;
+
+    } else {
+
+        for (const auto& board : boards)
+            if (CGAL::do_intersect(board.profile, fov_small))
+                return true;
+
+    }
 
     return false;
 }
 
-bool Board_set::detect_vignette_fov_large () const {
-    for (const auto& board : boards)
-        if (CGAL::do_intersect(board.profile_buffered, fov_large))
-            return true;
+bool Board_set::detect_vignette_fov_large (bool buffer_active) const {
+    if (buffer_active) {
+
+        for (const auto& board : boards)
+            if (CGAL::do_intersect(board.profile_buffered, fov_large))
+                return true;
+
+    } else {
+
+        for (const auto& board : boards)
+            if (CGAL::do_intersect(board.profile, fov_large))
+                return true;
+
+    }
 
     return false;
 }
@@ -67,7 +98,7 @@ bool Board_set::align (Asterism& destination) {
         if ( temporary.boards[0].teleport( destination.p[ permutations[i][0] ] ) &&
              temporary.boards[1].teleport( destination.p[ permutations[i][1] ] ) &&
              temporary.boards[2].teleport( destination.p[ permutations[i][2] ] ) &&
-             ! temporary.detect_collision() )
+             ! temporary.detect_collision(false) )
         {
             temporary = *this;
             targets_distance_vector.push_back( std::make_pair( permutations[i], temporary.calculate_distance( destination, permutations[i] ) ) );
