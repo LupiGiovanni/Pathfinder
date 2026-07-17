@@ -21,10 +21,16 @@ bool Asterism::is_valid () const {
     return false;
 }
 
-void Asterism::print () const {
-    std::cout << "("
+void Asterism::print (bool error_stream) const {
+    if ( error_stream ) {
+        std::cerr << "("
               << p[0].x() << ", " << p[0].y() << "), ("
               << p[1].x() << ", " << p[1].y() << "), ("
-              << p[2].x() << ", " << p[2].y() << ")"
-              << std::endl;
+              << p[2].x() << ", " << p[2].y() << ")\n";
+    } else {
+        std::cout << "("
+                  << p[0].x() << ", " << p[0].y() << "), ("
+                  << p[1].x() << ", " << p[1].y() << "), ("
+                  << p[2].x() << ", " << p[2].y() << ")\n";
+    }
 }

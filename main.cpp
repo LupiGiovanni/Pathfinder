@@ -9,32 +9,19 @@ int main () {
     A_star astar;
     Simulation sim;
     std::vector<Asterism> path;
-    // std::chrono::high_resolution_clock::time_point start_time, end_time;
-    // std::chrono::duration<double> elapsed_time;
-    // double total = 0;
-    //
-    // for (size_t i = 0; i < cedric_dataset.size() - 1; i++) {
-    //
-    //     start_time = std::chrono::high_resolution_clock::now();
-    //     path = astar.search ( cedric_dataset[ i ], cedric_dataset[ i+1 ] );
-    //     end_time = std::chrono::high_resolution_clock::now();
-    //
-    //     elapsed_time = end_time - start_time;
-    //     total += elapsed_time.count();
-    //
-    //     if ( path.empty() )
-    //         std::cout << "Failed" << std::endl;
-    // }
-    //
-    // std::cout << "Average search time: " << total / static_cast<double>(cedric_dataset.size() - 1) << " seconds" << std::endl;
+    double time_sum = 0.;
+    int failed = 0;
 
-    path = astar.search ( cedric_dataset[ 0 ], cedric_dataset[ 15 ] );
-    for (const auto& asterism : path) {
-        asterism.print();
+    for (size_t i = 0; i < cedric_dataset.size() - 1; i++) {
+        path = astar.search(cedric_dataset[i], cedric_dataset[i+1]);
+        sim.run(path);
+        time_sum += sim.duration;
+        if (sim.collision_detected || !sim.destination_reached )
+            failed++;
     }
 
-    sim.run(path);
-    sim.print_results();
+    std::cout << "Average time: " << time_sum / (cedric_dataset.size() - 1) << std::endl;
+    std::cout << "Failed: " << failed << std::endl;
 
     return 0;
 }

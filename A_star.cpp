@@ -62,7 +62,7 @@ std::vector<State> A_star::search (State& start, const State& goal, bool goal_lo
                        << " frontier=" << frontier.size()
                        << " visited=" << g_so_far.size()
                        << " current.f=" << current.f
-                       << " current.g=" << current.g << std::endl;
+                       << " current.g=" << current.g << "\n";
         }
         // *******************************************************
 
@@ -134,11 +134,11 @@ bool A_star::is_valid_state (const State& state, Board_set& board_set) {
     board_set.teleport(a);
 
     if constexpr ( FOV_OPTIONS == Fov_options::none )
-        return ! board_set.detect_collision();
+        return ! board_set.detect_collision(true);
     if constexpr ( FOV_OPTIONS == Fov_options::fov_small_excluded )
-        return ! board_set.detect_collision() && ! board_set.detect_vignette_fov_small();
+        return ! board_set.detect_collision(true) && ! board_set.detect_vignette_fov_small(true);
     if constexpr ( FOV_OPTIONS == Fov_options::fov_large_excluded )
-        return ! board_set.detect_collision() && ! board_set.detect_vignette_fov_large();
+        return ! board_set.detect_collision(true) && ! board_set.detect_vignette_fov_large(true);
 }
 
 std::vector<State> A_star::get_next_states (const State& current, const State& goal, Board_set& board_set, bool restrict_finished_boards) {
