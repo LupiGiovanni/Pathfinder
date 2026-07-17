@@ -15,6 +15,7 @@ add_executable(little_program
                 Discrete_point.cpp
                 State.cpp
                 A_star.cpp
+                Simulation.cpp
                 main.cpp)
 
 target_link_libraries(little_program CGAL::CGAL)

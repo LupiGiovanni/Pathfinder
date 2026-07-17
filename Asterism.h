@@ -12,6 +12,8 @@ struct Asterism {
     Asterism ();
     explicit Asterism (const std::array<Point, 3>& points);
     Asterism (double p0_x, double p1_x, double p2_x, double p0_y, double p1_y, double p2_y);
+    bool is_valid () const;
+    void print () const;
 
     std::array<Point, 3> p;
 };

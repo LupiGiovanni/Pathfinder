@@ -23,6 +23,7 @@ enum class Fov_options {none, fov_small_excluded, fov_large_excluded};
 constexpr auto FOV_OPTIONS = Fov_options::none;
 
 constexpr double SIMULATION_TIME_STEP = 0.05; // s
+constexpr int MAX_ITERATIONS = 10000;
 constexpr double TECHNICAL_FIELD_RADIUS = 265.2; // mm
 constexpr double BOARD_PROFILE_BUFFER_WIDTH = 10.; // mm
 constexpr double BOARDS_CRUISE_VELOCITY = 4.; // mm/s

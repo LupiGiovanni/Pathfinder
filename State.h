@@ -12,6 +12,7 @@
 struct State {
     State ();
     explicit State (const std::array<Discrete_point, 3>& points);
+    void print () const;
 
     std::array<Discrete_point, 3> p;
     long g;
