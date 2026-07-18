@@ -8,6 +8,8 @@ set(CMAKE_BUILD_TYPE Release)
 
 find_package(CGAL REQUIRED)
 
+find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
+
 add_executable(little_program
                 Asterism.cpp
                 Board.cpp
@@ -16,6 +18,11 @@ add_executable(little_program
                 State.cpp
                 A_star.cpp
                 Simulation.cpp
+                Animation.cpp
                 main.cpp)
 
-target_link_libraries(little_program CGAL::CGAL)
+target_link_libraries(little_program
+                        CGAL::CGAL
+                        sfml-graphics
+                        sfml-window
+                        sfml-system)

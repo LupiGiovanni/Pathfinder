@@ -12,6 +12,7 @@ enum class Board_type { board_0, board_1, board_2 }; // See documentation for CA
 
 class Board {
     friend class Board_set;
+    friend class Animation;
 
 private:
     Polygon profile;

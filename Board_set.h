@@ -11,6 +11,8 @@
 #include "Board.h"
 
 class Board_set {
+    friend class Animation;
+
 public:
     Board_set ();
 
