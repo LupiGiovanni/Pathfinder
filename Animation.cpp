@@ -188,7 +188,7 @@ void Animation::animate (const std::vector<Asterism>& aligned_path) {
             clear_trajectories();
             temporary.teleport(aligned_path.front());
 
-            for (int i = 2; i < aligned_path.size(); i++) {
+            for (int i = 1; i < aligned_path.size(); i++) {
                 if (collision_detected)
                     break;
 

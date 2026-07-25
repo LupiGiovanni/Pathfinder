@@ -29,8 +29,8 @@ constexpr double BOARD_PROFILE_BUFFER_WIDTH = 10.; // mm
 constexpr double BOARDS_CRUISE_VELOCITY = 4.; // mm/s
 constexpr double DESTINATION_REACHED_TOLERANCE = BOARDS_CRUISE_VELOCITY * SIMULATION_TIME_STEP; // mm
 
-constexpr long GOAL_REACHED_TOLERANCE = 20000; // 1000 units == 1 mm
-constexpr long SEARCH_GRID_SIZE = 10; // 10 * 1000 units
+constexpr long GOAL_REACHED_TOLERANCE = 30500; // 1000 units == 1 mm
+constexpr long SEARCH_GRID_SIZE = 30; // 30 * 1000 units
 constexpr long TIE_BREAK = 100;
 constexpr long WEIGHT = 2;
 
